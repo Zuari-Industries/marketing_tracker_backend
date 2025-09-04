@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.swp
+
+# Virtual environment
+venv/
+env/
+# Local Flask environment
+.flaskenv
+
+
+
+# Local env files
+.env
+
+# Logs
+logs/
+*.log
+
+# Editor files
+.vscode/
+.idea/
+.DS_Store
