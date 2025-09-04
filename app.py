@@ -58,7 +58,7 @@ db = SQLAlchemy(app)
 
 allowed_origins = [
     "http://localhost:5173",                 # Vite dev
-    "https://<your-frontend>.vercel.app",    # Vercel preview/prod
+    "https://marketing-tracker-frontend-um49.vercel.app/",    # Vercel preview/prod
     # "https://your-custom-domain.com",       # if/when you add a custom domain
 ]
 
