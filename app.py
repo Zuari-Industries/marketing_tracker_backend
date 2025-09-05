@@ -1,23 +1,23 @@
 import os
 import io
 import csv
-from flask import Flask, request, jsonify,Response,url_for
-from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask import Flask, request, jsonify,Response,url_for # type: ignore
+from flask_sqlalchemy import SQLAlchemy # type: ignore
+from flask_cors import CORS # type: ignore
+from werkzeug.security import generate_password_hash, check_password_hash # type: ignore
 from datetime import datetime, date, timedelta
-from flask_socketio import SocketIO
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, JWTManager
+from flask_socketio import SocketIO # type: ignore
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, JWTManager # type: ignore
 from urllib.parse import urlencode
-import jwt as pyjwt 
+import jwt as pyjwt  # type: ignore
 from datetime import timedelta
-from itsdangerous import URLSafeTimedSerializer,SignatureExpired, BadSignature
+from itsdangerous import URLSafeTimedSerializer,SignatureExpired, BadSignature # type: ignore
 import smtplib
 from email.message import EmailMessage
-from flask_mail import Mail, Message
-from dotenv import load_dotenv
-from flask_bcrypt import Bcrypt
-from sqlalchemy import event
+from flask_mail import Mail, Message # type: ignore
+from dotenv import load_dotenv # type: ignore
+from flask_bcrypt import Bcrypt # type: ignore
+from sqlalchemy import event # type: ignore
 
 
 # Load environment variables
