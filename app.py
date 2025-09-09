@@ -49,12 +49,17 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 instance_path = os.path.join(basedir, "instance")
 os.makedirs(instance_path, exist_ok=True)
 
-db_url = "sqlite:///" + os.path.join(instance_path, "marketing_hub.db")
+# Use DATABASE_URL if present, otherwise fallback to SQLite
+db_url = os.getenv(
+    "DATABASE_URL", 
+    "sqlite:///" + os.path.join(instance_path, "marketing_hub.db")
+)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-
 db = SQLAlchemy(app)
+
 
 allowed_origins = [
     "http://localhost:5173",                 # Vite dev
@@ -868,5 +873,7 @@ def init_db_command():
             print('Default form fields seeded.')
     print('Database initialization complete.')
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
     socketio.run(app, debug=True)
