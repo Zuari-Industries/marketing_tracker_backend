@@ -88,6 +88,8 @@ if db_url.startswith("sqlite"):
 # --- Database Models (Schema) ---
 class User(db.Model):
     """User Model"""
+    __tablename__ = '"user"'  # double quotes for Postgres reserved keyword
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
@@ -95,6 +97,7 @@ class User(db.Model):
     role = db.Column(db.String(50), nullable=False, default='User')
     business_unit = db.Column(db.String(100))
     joined_date = db.Column(db.DateTime, default=datetime.utcnow)
+
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
