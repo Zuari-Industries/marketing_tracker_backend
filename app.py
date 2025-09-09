@@ -55,6 +55,9 @@ db_url = os.getenv(
     "sqlite:///" + os.path.join(instance_path, "marketing_hub.db")
 )
 
+db_url = os.getenv("DATABASE_URL")
+print("Using DATABASE_URL:", db_url) 
+
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
