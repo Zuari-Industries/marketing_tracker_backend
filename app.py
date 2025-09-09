@@ -88,7 +88,7 @@ if db_url.startswith("sqlite"):
 # --- Database Models (Schema) ---
 class User(db.Model):
     """User Model"""
-    __tablename__ = '"user"'  # double quotes for Postgres reserved keyword
+    __tablename__ = 'user'  # double quotes for Postgres reserved keyword
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -123,10 +123,10 @@ class Request(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # ForeignKey references updated to match quoted "user" table
-    created_by_id = db.Column(db.Integer, db.ForeignKey('"user".id'), nullable=False)
+    created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     type = db.Column(db.String(100), nullable=True)
     business_unit = db.Column(db.String(100), nullable=True)
-    assigned_to_id = db.Column(db.Integer, db.ForeignKey('"user".id'), nullable=True)
+    assigned_to_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
 
     # Relationships remain the same
     requester = db.relationship('User', foreign_keys=[created_by_id], backref='created_requests')
@@ -189,7 +189,7 @@ class Comment(db.Model):
     action_status = db.Column(db.String(50), nullable=True) # Pending, Approved, Rejected
     
     request_id = db.Column(db.Integer, db.ForeignKey('request.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('"user".id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     # --- ADD THESE TWO LINES ---
     parent_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=True)
     replies = db.relationship('Comment', backref=db.backref('parent', remote_side=[id]), lazy='joined', cascade="all, delete-orphan")
@@ -213,7 +213,7 @@ class ActivityLog(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     request_id = db.Column(db.Integer, db.ForeignKey('request.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('"user".id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     request = db.relationship('Request', backref=db.backref('history_logs', lazy=True, cascade="all, delete-orphan"))
     user = db.relationship('User', backref='activity_logs')
@@ -231,7 +231,7 @@ class Notification(db.Model):
     message = db.Column(db.String(255), nullable=False)
     is_read = db.Column(db.Boolean, default=False, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('"user".id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     user = db.relationship('User', backref='notifications')
 
