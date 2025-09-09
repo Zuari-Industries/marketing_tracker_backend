@@ -874,6 +874,10 @@ def init_db_command():
     print('Database initialization complete.')
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-    socketio.run(app, debug=True)
+    # Only use db.create_all() locally, not in production
+    import os
+    if os.getenv("FLASK_ENV") == "development":
+        with app.app_context():
+            db.create_all()
+    socketio.run(app, debug=os.getenv("FLASK_ENV") == "development")
+
