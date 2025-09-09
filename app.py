@@ -122,11 +122,13 @@ class Request(db.Model):
     due_date = db.Column(db.Date, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    # ForeignKey references updated to match quoted "user" table
+    created_by_id = db.Column(db.Integer, db.ForeignKey('"user".id'), nullable=False)
     type = db.Column(db.String(100), nullable=True)
     business_unit = db.Column(db.String(100), nullable=True)
-    assigned_to_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    assigned_to_id = db.Column(db.Integer, db.ForeignKey('"user".id'), nullable=True)
 
+    # Relationships remain the same
     requester = db.relationship('User', foreign_keys=[created_by_id], backref='created_requests')
     assignee = db.relationship('User', foreign_keys=[assigned_to_id], backref='assigned_requests')
 
