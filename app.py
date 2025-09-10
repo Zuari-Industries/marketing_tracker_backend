@@ -64,6 +64,13 @@ print("Using DATABASE_URL:", db_url)
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    "pool_pre_ping": True,     # Validate connections before using
+    "pool_recycle": 280,       # Recycle connections before Neon timeout (~5 min)
+    "pool_size": 5,            # Base pool size (tune if needed)
+    "max_overflow": 10         # Extra connections allowed
+}
+
 db = SQLAlchemy(app)
 
 # Configure logging
