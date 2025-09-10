@@ -1,6 +1,9 @@
 import os
 import io
 import csv
+import time
+import logging
+from sqlalchemy.exc import OperationalError
 from flask import Flask, request, jsonify,Response,url_for # type: ignore
 from flask_sqlalchemy import SQLAlchemy # type: ignore
 from flask_cors import CORS # type: ignore
@@ -62,6 +65,57 @@ app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Keep originals
+_original_execute = db.session.execute
+_original_get = db.session.get
+_original_commit = db.session.commit
+
+def retry_execute(*args, retries=3, delay=2, **kwargs):
+    last_error = None
+    for attempt in range(retries):
+        try:
+            return _original_execute(*args, **kwargs)
+        except OperationalError as e:
+            last_error = e
+            logger.warning(f"DB execute failed (attempt {attempt+1}/{retries}): {e}")
+            time.sleep(delay)
+    logger.error(f"DB execute permanently failed after {retries} retries")
+    raise last_error
+
+def retry_get(*args, retries=3, delay=2, **kwargs):
+    last_error = None
+    for attempt in range(retries):
+        try:
+            return _original_get(*args, **kwargs)
+        except OperationalError as e:
+            last_error = e
+            logger.warning(f"DB get failed (attempt {attempt+1}/{retries}): {e}")
+            time.sleep(delay)
+    logger.error(f"DB get permanently failed after {retries} retries")
+    raise last_error
+
+def retry_commit(*args, retries=3, delay=2, **kwargs):
+    last_error = None
+    for attempt in range(retries):
+        try:
+            return _original_commit(*args, **kwargs)
+        except OperationalError as e:
+            last_error = e
+            db.session.rollback()  # rollback failed transaction
+            logger.warning(f"DB commit failed (attempt {attempt+1}/{retries}), rolled back: {e}")
+            time.sleep(delay)
+    logger.error(f"DB commit permanently failed after {retries} retries")
+    raise last_error
+
+# Patch them
+db.session.execute = retry_execute
+db.session.get = retry_get
+db.session.commit = retry_commit
 
 
 allowed_origins = [
