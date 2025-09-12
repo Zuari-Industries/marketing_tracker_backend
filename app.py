@@ -3,7 +3,7 @@ import io
 import csv
 import time
 import logging
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import OperationalError # type: ignore
 from flask import Flask, request, jsonify,Response,url_for # type: ignore
 from flask_sqlalchemy import SQLAlchemy # type: ignore
 from flask_cors import CORS # type: ignore
@@ -21,6 +21,7 @@ from flask_mail import Mail, Message # type: ignore
 from dotenv import load_dotenv # type: ignore
 from flask_bcrypt import Bcrypt # type: ignore
 from sqlalchemy import event # type: ignore
+from sqlalchemy import func
 
 
 # Load environment variables
@@ -58,7 +59,7 @@ db_url = os.getenv(
     "sqlite:///" + os.path.join(instance_path, "marketing_hub.db")
 )
 
-db_url = os.getenv("DATABASE_URL")
+# db_url = os.getenv("DATABASE_URL")
 print("Using DATABASE_URL:", db_url) 
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
@@ -152,7 +153,7 @@ if db_url.startswith("sqlite"):
 # --- Database Models (Schema) ---
 class User(db.Model):
     """User Model"""
-    __tablename__ = 'user'  # double quotes for Postgres reserved keyword
+    __tablename__ = 'user'    
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -503,19 +504,41 @@ def create_request():
     db.session.commit()
     # --- ADD THIS LOGIC BLOCK ---
     # Auto-add subtasks from templates
-    if new_request.type:
-        templates = SubtaskTemplate.query.filter_by(request_type=new_request.type).all()
-        for template in templates:
-            new_subtask = Subtask(
-                title=template.title,
-                status='Not Started',
-                request_id=new_request.id,
-                # start_date and end_date are intentionally left NULL
-            )
-            db.session.add(new_subtask)
-    # --- END OF NEW LOGIC ---
+    # if new_request.type:
+    #     templates = SubtaskTemplate.query.filter_by(request_type=new_request.type).all()
+    #     for template in templates:
+    #         new_subtask = Subtask(
+    #             title=template.title,
+    #             status='Not Started',
+    #             request_id=new_request.id,
+    #             # start_date and end_date are intentionally left NULL
+    #         )
+    #         db.session.add(new_subtask)
+    # # --- END OF NEW LOGIC ---
 
-    db.session.commit() # Commit again to save the new subtasks
+    # db.session.commit() # Commit again to save the new subtasks
+
+    # Auto-add subtasks from templates
+    if new_request.type:
+    # Normalize both sides: trim spaces + lowercase
+     templates = SubtaskTemplate.query.filter(
+        func.lower(func.trim(SubtaskTemplate.request_type)) ==
+        func.lower(func.trim(new_request.type))
+    ).all()
+
+    if not templates:
+        print(f"[DEBUG] No templates found for request type: {repr(new_request.type)}")
+
+    for template in templates:
+        new_subtask = Subtask(
+            title=template.title,
+            status='Not Started',
+            request_id=new_request.id,
+            # start_date and end_date intentionally left NULL
+        )
+        db.session.add(new_subtask)
+
+    db.session.commit()
 
     # NOTIFICATION LOGIC
     notification_message = f"New task '{new_request.title}' created by {creator.name}."
